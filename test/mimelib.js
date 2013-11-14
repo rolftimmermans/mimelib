@@ -144,21 +144,43 @@ exports["Mime Words"] = {
 
         test.equal(mimelib.encodeMimeWords(input1, "Q", 52), output1);
         test.equal(mimelib.parseMimeWords(output1), input1);
-        
+
         test.equal(mimelib.encodeMimeWords(input2, "Q", 52), output2);
         test.equal(mimelib.parseMimeWords(output2), input2);
 
         test.done();
-    } 
+    }
 }
 
-exports["Fold long line"] = function(test){
-    var inputStr = "Subject: Testin command line kirja õkva kakva mõni tõnis kõllas põllas tõllas rõllas jušla kušla tušla musla",
-        outputStr = "Subject: Testin command line kirja =?UTF-8?Q?=C3=B5kva?= kakva\r\n"+
-                    " =?UTF-8?Q?m=C3=B5ni_t=C3=B5nis_k=C3=B5llas_p=C3=B5?=\r\n"+
-                    " =?UTF-8?Q?llas_t=C3=B5llas_r=C3=B5llas_ju=C5=A1la_?=\r\n"+
-                    " =?UTF-8?Q?ku=C5=A1la_tu=C5=A1la?= musla";
+exports["Fold long line"] = {
+    "Fold lines with regular line ending": function(test){
+        var inputStr = "Subject: Testin command line kirja õkva kakva mõni tõnis kõllas põllas tõllas rõllas jušla kušla tušla musla",
+            outputStr = "Subject: Testin command line kirja =?UTF-8?Q?=C3=B5kva?= kakva\r\n"+
+                        " =?UTF-8?Q?m=C3=B5ni_t=C3=B5nis_k=C3=B5llas_p=C3=B5?=\r\n"+
+                        " =?UTF-8?Q?llas_t=C3=B5llas_r=C3=B5llas_ju=C5=A1la_?=\r\n"+
+                        " =?UTF-8?Q?ku=C5=A1la_tu=C5=A1la?= musla";
 
-    test.equal(outputStr, mimelib.foldLine(mimelib.encodeMimeWords(inputStr, "Q", 52), 76, false, false, 52));
-    test.done();
+        test.equal(outputStr, mimelib.foldLine(mimelib.encodeMimeWords(inputStr, "Q", 52), 76, false, false, 52));
+        test.done();
+    },
+
+    "Fold lines with custom line boundary": function(test){
+        var inputStr = "Subject: This is a long line that should be folded with a custom line boundary",
+            outputStr = "Subject: This is a long line that should be\n folded with a custom line boundary";
+
+        test.equal(outputStr, mimelib.foldLine(inputStr, 50, false, false, 52, "\n"));
+        test.done();
+    },
+
+    "Fold base64 data with custom line boundary": function(test){
+        var inputStr = "TG9yZW0gSXBzdW0gaXMgc2ltcGx5IGR1bW15IHRleHQgb2YgdG"+
+                       "hlIHByaW50aW5nIGFuZCB0eXBlc2V0dGluZyBpbmR1c3RyeS4g"+
+                       "TG9yZW0gSXBzdW0gaGFzIGJlZW4gdGhlIGluZHVzdHJ5J3Mgc3"
+            outputStr = "TG9yZW0gSXBzdW0gaXMgc2ltcGx5IGR1bW15IHRleHQgb2YgdG\n"+
+                        "hlIHByaW50aW5nIGFuZCB0eXBlc2V0dGluZyBpbmR1c3RyeS4g\n"+
+                        "TG9yZW0gSXBzdW0gaGFzIGJlZW4gdGhlIGluZHVzdHJ5J3Mgc3";
+
+        test.equal(outputStr, mimelib.foldLine(inputStr, 50, true, false, 52, "\n"));
+        test.done();
+    }
 }
